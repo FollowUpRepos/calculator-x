@@ -15,4 +15,12 @@ function difference(first, second ) {
     return (calc * 100) / first 
 }
 
+
+// Export the functions as part of an object which can be destructured
+export {
+  modulo,
+  percentage,
+  percentageOf,
+  difference
+}
  

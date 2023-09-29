@@ -11,3 +11,9 @@ function calculateAspectRatio(originalWidth, originalHeight, newValue, valueType
         originalHeight / originalWidth;
     return fixRoundingErrors(formula * newValue);
 }
+
+// Export the functions as part of an object which can be destructured
+export {
+  fixRoundingErrors,
+  calculateAspectRatio
+}
