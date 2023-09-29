@@ -24,8 +24,14 @@ beforeAll(async () => {
 afterAll((done) => {
     try {
         liveServer.shutdown();
-        this.puppeteer.close();
-    } catch (e) { }
+        // `this.puppeteer` causes an error. Perhaps `browser`
+        // is what was meant.
+
+        // this.puppeteer.close();
+        browser.close();
+    } catch (e) {
+        console.log("e:", e); 
+    }
     done();
 });
 
@@ -49,14 +55,23 @@ describe('Import', () => {
             .readFileSync("./modules/index.js")
             .toString("utf-8")
             .replace(/ /g, "");
-        expect(indexFileContents).toMatch(/import.*modulo.*from.*\/percentage.js/);
-        expect(indexFileContents).toMatch(/import.*percentage.*from.*\/percentage.js/);
-        expect(indexFileContents).toMatch(/import.*percentageOf.*from.*\/percentage.js/);
-        expect(indexFileContents).toMatch(/import.*difference.*from.*\/percentage.js/);
-        expect(indexFileContents).toMatch(/import.*from.*\/aspect-ratio.js/);
+        // Edit regexes to allow new lines as well as white space
+        expect(indexFileContents).toMatch(/import[\s\S]*modulo[\s\S]*from[\s\S]*\/percentage.js/);
+        expect(indexFileContents).toMatch(/import[\s\S]*percentage[\s\S]*from[\s\S]*\/percentage.js/);
+        expect(indexFileContents).toMatch(/import[\s\S]*percentageOf[\s\S]*from[\s\S]*\/percentage.js/);
+        expect(indexFileContents).toMatch(/import[\s\S]*difference[\s\S]*from[\s\S]*\/percentage.js/);
+        expect(indexFileContents).toMatch(/import[\s\S]*from[\s\S]*\/aspect-ratio.js/);
     });
     it("`modules/index.js` should be included in `index.html` using script tag", async () => {
-        const scriptTag = await page.$eval('script[src="modules/index.js"]', (el) => el.outerHTML);
+        // Both "modules/..." and "./modules/..." are valid references
+        // to the modules folder. Both references should be accepted.
+        let scriptTag
+        try {
+            scriptTag = await page.$eval('script[src="modules/index.js"]', (el) => el.outerHTML);
+        } catch {
+           scriptTag = await page.$eval('script[src="./modules/index.js"]', (el) => el.outerHTML);
+        }
+
         expect(scriptTag).toBeDefined();
     });
 });
